@@ -31,7 +31,7 @@
       z-index: 1;
     }
     .header {
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       padding-bottom: 10px;
       border-bottom: 2px solid rgba(0, 255, 204, 0.3);
       text-align: center;
@@ -40,13 +40,13 @@
     h1 {
       color: #4fc3f7;
       font-size: 1.6rem;
-      margin-bottom: 5px;
+      margin-bottom: -2px;
       letter-spacing: 3px;
     }
     .subtitle {
       color: #e0f7fa;
       font-size: 0.9rem;
-      margin-bottom: 10px;
+      margin-bottom: -2px;
     }
     .content {
       flex-grow: 1;
@@ -57,10 +57,11 @@
     .stats-container {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       gap: 10px;
     }
     .stat-box {
+      height: 80px;
       flex: 1;
       background: rgba(10, 25, 41, 0.8);
       border: 1px solid rgba(79, 195, 247, 0.3);
@@ -72,7 +73,7 @@
     .stat-title {
       font-size: 1.2rem;
       color: #b3e5fc;
-      margin-bottom: 5px;
+      margin-bottom: 0px;
     }
     .stat-value {
       font-size: 1.5rem;
@@ -85,42 +86,28 @@
     .lose {
       color: #ff5252;
     }
-    .period-container {
-      background: rgba(10, 25, 41, 0.8);
-      border: 1px solid rgba(79, 195, 247, 0.3);
+    .warning-container {
+      background: rgba(121, 13, 13, 0.8);
+      border: 1px solid rgba(255, 82, 82, 0.5);
       border-radius: 12px;
       padding: 12px;
-      margin-bottom: 15px;
+      margin-bottom: 0px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: pulse 2s infinite;
     }
-    .period-title {
+    .warning-text {
       font-size: 1rem;
-      color: #b3e5fc;
-    }
-    .period-input {
-      background: rgba(20, 40, 60, 0.8);
-      border: 1px solid #4fc3f7;
-      border-radius: 8px;
-      color: #ffffff;
-      padding: 8px;
-      width: 120px;
+      color: #ffff;
       text-align: center;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 1.2rem;
-    }
-    .update-btn {
-      background: linear-gradient(135deg, #00b0ff, #0091ea);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      padding: 8px 15px;
-      font-family: 'Share Tech Mono', monospace;
       font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0, 176, 255, 0.3);
+    }
+    @keyframes pulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
     }
     .pattern-display {
       background: rgba(10, 25, 41, 0.8);
@@ -164,6 +151,8 @@
     }
     .result-container {
       margin: 15px 0;
+      margin-top: 0px;
+      margin-bottom: -8px;
       padding: 15px;
       border-radius: 12px;
       border: 2px solid rgba(79, 195, 247, 0.5);
@@ -304,15 +293,15 @@
     }
     .notification.error {
       background: linear-gradient(135deg, #ff5252, #d50000);
-      border-left: 5px solid '#ff1744';
+      border-left: 5px solid #ff1744;
     }
     .notification.info {
       background: linear-gradient(135deg, #448aff, #2962ff);
-      border-left: 5px solid '#2979ff';
+      border-left: 5px solid #2979ff;
     }
     .notification.warning {
       background: linear-gradient(135deg, #ffab40, #ff9100);
-      border-left: 5px solid '#ff6d00';
+      border-left: 5px solid #ff6d00;
     }
     .additional-controls {
       display: grid;
@@ -400,7 +389,6 @@
       margin-bottom: 8px;
       color: #b3e5fc;
       font-size: 0.9rem;
-      text-align: left;
     }
     .form-input {
       width: 100%;
@@ -484,7 +472,7 @@
         margin-bottom: 5px;
         padding-bottom: 5px;
       }
-      .stats-container, .period-container {
+      .stats-container, .warning-container {
         margin-bottom: 8px;
       }
       .pattern-display {
@@ -564,10 +552,10 @@
         </div>
       </div>
       
-      <div class="period-container">
-        <div class="period-title"><i class="fas fa-calendar-alt"></i> PERIOD</div>
-        <input type="number" min="1" class="period-input" id="periodInput" value="1">
-        <button class="update-btn" id="btnUpdatePeriod">UPDATE</button>
+      <div class="warning-container">
+        <div class="warning-text">
+          <i class="fas fa-exclamation-triangle"></i> Warning: Apk သူခိုးများရှိသည် သတိထားပါ။
+        </div>
       </div>
       
       <div class="pattern-display" id="patternDisplay">
@@ -647,7 +635,6 @@
     let isProcessing = false;
     let winCount = 0;
     let loseCount = 0;
-    let periodNumber = 1;
     let consecutiveLosses = 0; 
     const patternDisplay = document.getElementById('patternDisplay');
     const predictionEl = document.getElementById('prediction');
@@ -657,7 +644,6 @@
     const noMatchEl = document.getElementById('noMatchMessage');
     const winCountEl = document.getElementById('winCount');
     const loseCountEl = document.getElementById('loseCount');
-    const periodInputEl = document.getElementById('periodInput');
     const notificationEl = document.getElementById('notification');
     const mainApp = document.getElementById('mainApp');
     const keyModal = document.getElementById('keyModal');
@@ -983,19 +969,19 @@
       inputDigits = [];
       updatePatternDisplay();
       predictionEl.textContent = '?';
-      confidenceEl.textContent = '';
+      confidenceEl.textContent = 'Waiting for pattern input...';
       statusEl.textContent = "Enter (B/S) for prediction";
       noMatchEl.style.display = 'none';
       showNotification("All data cleared", "success");
     }
     
-    // Handle win button click
+    // Handle win
     function handleWin() {
       winCount++;
       winCountEl.textContent = winCount;
-      winCountEl.classList.add('win');
+      showNotification("Win recorded!", "success");
       
-      // Reduce lose count by 1 (minimum 0)
+      // Reduce lose count by 1
       if (loseCount > 0) {
         loseCount--;
         loseCountEl.textContent = loseCount;
@@ -1003,133 +989,38 @@
       
       // Reset consecutive losses
       consecutiveLosses = 0;
-      
-      // Update Firebase
-      saveStatsToFirebase();
-      
-      // Update period number
-      periodNumber++;
-      periodInputEl.value = periodNumber;
-      updatePeriodInFirebase();
-      
-      showNotification("WIN recorded! Period updated.", "success");
     }
     
-    // Handle lose button click
+    // Handle lose
     function handleLose() {
       loseCount++;
-      consecutiveLosses++;
       loseCountEl.textContent = loseCount;
-      loseCountEl.classList.add('lose');
-      
-      // Update Firebase
-      saveStatsToFirebase();
-      
-      // Update period number
-      periodNumber++;
-      periodInputEl.value = periodNumber;
-      updatePeriodInFirebase();
-      
-      showNotification("LOSE recorded! Period updated.", "error");
-    }
-    
-    // Save stats to Firebase
-    function saveStatsToFirebase() {
-      db.ref('stats').set({
-        winCount: winCount,
-        loseCount: loseCount,
-        consecutiveLosses: consecutiveLosses
-      }).catch(error => {
-        console.error("Error saving stats to Firebase:", error);
-      });
-    }
-    
-    // Update period in Firebase
-    function updatePeriodInFirebase() {
-      db.ref('period').set(periodNumber).catch(error => {
-        console.error("Error updating period in Firebase:", error);
-      });
-    }
-    
-    // Load data from Firebase
-    function loadFromFirebase() {
-      db.ref('stats').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          winCount = data.winCount || 0;
-          loseCount = data.loseCount || 0;
-          consecutiveLosses = data.consecutiveLosses || 0;
-          
-          winCountEl.textContent = winCount;
-          loseCountEl.textContent = loseCount;
-        }
-      }).catch(error => {
-        console.error("Error loading stats from Firebase:", error);
-      });
-      
-      db.ref('period').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          periodNumber = snapshot.val();
-          periodInputEl.value = periodNumber;
-        }
-      }).catch(error => {
-        console.error("Error loading period from Firebase:", error);
-      });
-      
-      db.ref('inputDigits').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          inputDigits = snapshot.val();
-          updatePatternDisplay();
-          
-          if (inputDigits.length >= patternLength) {
-            showResult();
-          }
-        }
-      }).catch(error => {
-        console.error("Error loading input digits from Firebase:", error);
-      });
-    }
-    
-    // Save input digits to Firebase
-    function saveInputToFirebase() {
-      db.ref('inputDigits').set(inputDigits).catch(error => {
-        console.error("Error saving input digits to Firebase:", error);
-      });
+      consecutiveLosses++;
+      showNotification("Loss recorded", "warning");
     }
     
     // Initialize the app
     function initApp() {
+      // Initialize pattern display
+      updatePatternDisplay();
+      
       // Set up event listeners
       document.getElementById('btnBig').addEventListener('click', () => handleInput('B'));
       document.getElementById('btnSmall').addEventListener('click', () => handleInput('S'));
-      document.getElementById('btnDelete').addEventListener('click', deleteLastInput);
-      document.getElementById('btnClear').addEventListener('click', clearAllData);
       document.getElementById('btnWin').addEventListener('click', handleWin);
       document.getElementById('btnLose').addEventListener('click', handleLose);
-      document.getElementById('btnUpdatePeriod').addEventListener('click', updatePeriodFromInput);
+      document.getElementById('btnDelete').addEventListener('click', deleteLastInput);
+      document.getElementById('btnClear').addEventListener('click', clearAllData);
       
-      // Load data
+      // Load pattern map
       loadPatternMap();
-      loadFromFirebase();
       
-      // Set up auto-save
-      setInterval(saveInputToFirebase, 5000);
+      // Show welcome message
+      showNotification("Welcome to ZAW GYI-13DIGIT AI Predictor", "info");
     }
     
-    // Update period from input
-    function updatePeriodFromInput() {
-      const newPeriod = parseInt(periodInputEl.value);
-      if (!isNaN(newPeriod) && newPeriod > 0) {
-        periodNumber = newPeriod;
-        updatePeriodInFirebase();
-        showNotification(`Period updated to ${periodNumber}`, "success");
-      } else {
-        showNotification("Please enter a valid period number", "error");
-      }
-    }
-    
-    // Initialize license check
-    checkLicenseStatus();
+    // Check license status on page load
+    document.addEventListener('DOMContentLoaded', checkLicenseStatus);
   </script>
 </body>
 </html>
