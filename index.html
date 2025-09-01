@@ -30,43 +30,6 @@
       position: relative;
       z-index: 1;
     }
-
-    .menu {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      z-index: 3000;
-    }
-    .menu-btn {
-      background: none;
-      border: none;
-      font-size: 1.4rem;
-      color: #4fc3f7;
-      cursor: pointer;
-    }
-    .menu-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background: rgba(10, 25, 41, 0.95);
-      border: 1px solid rgba(79, 195, 247, 0.3);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      min-width: 160px;
-    }
-    .menu-content a {
-      display: block;
-      padding: 10px;
-      color: #b3e5fc;
-      text-decoration: none;
-    }
-    .menu-content a:hover {
-      background: rgba(79, 195, 247, 0.2);
-    }
-    .menu.show .menu-content {
-      display: block;
-    }
-
     .header {
       margin-bottom: 5px;
       padding-bottom: 10px;
@@ -203,10 +166,6 @@
       text-align: center;
       text-transform: uppercase;
       letter-spacing: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
     .prediction {
       font-size: 3.5rem;
@@ -232,7 +191,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 8px;
       margin-top: 10px;
-      margin-bottom: 8px;
     }
     .btn {
       padding: 14px 5px;
@@ -488,16 +446,6 @@
       color: #b3e5fc;
       font-size: 0.9rem;
     }
-    .key-spinner {
-      border: 2px solid rgba(79, 195, 247, 0.3);
-      border-top: 2px solid #4fc3f7;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      display: none;
-      margin-right: 10px;
-    }
     
     @media (min-width: 768px) {
       .container {
@@ -569,17 +517,15 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Enter License Key</label>
-          <input type="text" id="licenseKeyInput" class="form-input" placeholder="Enter your license key" onkeypress="handleKeyPress(event)">
+          <input type="text" id="licenseKeyInput" class="form-input" placeholder="Enter your license key">
         </div>
-        <button class="btn-key" onclick="validateLicenseKey()" id="validateBtn">
-          <div class="key-spinner" id="keySpinner"></div>
+        <button class="btn-key" onclick="validateLicenseKey()">
           <i class="fas fa-unlock"></i>
           Validate Key
         </button>
         <div class="access-message" id="accessMessage">
           Enter a valid license key to access the AI predictor
         </div>
-        
         <button class="btn-contact" onclick="contactDeveloper()">
           <i class="fas fa-paper-plane"></i>
           Contact Developer: @leostrike223
@@ -589,16 +535,6 @@
   </div>
   
   <div class="container" id="mainApp" style="display: none;">
-
-    <!-- Top-right menu -->
-    <div class="menu" id="topMenu">
-      <button class="menu-btn"><i class="fas fa-bars"></i></button>
-      <div class="menu-content" id="menuContent">
-        <a href="#" onclick="checkKeyTime()"><i class="fas fa-clock"></i> Check Key Time</a>
-        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
-      </div>
-    </div>
-
     <div class="header">
       <h1><i class="head"></i> ZAW GYI/PAI-13DIGIT AI</h1>
       <div class="subtitle">AI Matching Predictor with Enhanced Win/Lose Logic</div>
@@ -607,11 +543,11 @@
     <div class="content">
       <div class="stats-container">
         <div class="stat-box">
-          <div class="stat-title">WIN COUNT</div>
+          <div class="stat-title">WIN STREAK</div>
           <div class="stat-value win" id="winCount">0</div>
         </div>
         <div class="stat-box">
-          <div class="stat-title">LOSE COUNT</div>
+          <div class="stat-title">LOSE STREAK</div>
           <div class="stat-value lose" id="loseCount">0</div>
         </div>
       </div>
@@ -661,7 +597,7 @@
   </div>
 
   <script>
-    // Firebase configuration for license keys only
+    // Firebase configuration for license keys
     const licenseFirebaseConfig = {
       apiKey: "AIzaSyBNDFi-i58PXRAu0w57armj_Dpn42X6i5g",
       authDomain: "admin-panel-17295.firebaseapp.com",
@@ -673,10 +609,26 @@
       measurementId: "G-63JZ6YDWXQ"
     };
     
-    // Initialize Firebase for license keys only
+    // Firebase configuration for app data
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaqQUWLbb1SV64xsJ0CG7_jKW1PzD0MpA",
+      authDomain: "zawaung-17bf0.firebaseapp.com",
+      databaseURL: "https://zawaung-17bf0-default-rtdb.firebaseio.com",
+      projectId: "zawaung-17bf0",
+      storageBucket: "zawaung-17bf0.appspot.com",
+      messagingSenderId: "1029965895021",
+      appId: "1:1029965895021:web:e461ae53aaabcc9e527664"
+    };
+    
+    // Initialize Firebase for app data
+    firebase.initializeApp(firebaseConfig, "appData");
+    const db = firebase.database(firebase.app("appData"));
+    
+    // Initialize Firebase for license keys
     const licenseApp = firebase.initializeApp(licenseFirebaseConfig, "licenseData");
     const licenseDb = firebase.database(licenseApp);
     
+
     let inputDigits = [];
     const patternLength = 13;
     let patternMap = {};
@@ -696,13 +648,8 @@
     const mainApp = document.getElementById('mainApp');
     const keyModal = document.getElementById('keyModal');
     const accessMessage = document.getElementById('accessMessage');
-    const keySpinner = document.getElementById('keySpinner');
-    const validateBtn = document.getElementById('validateBtn');
     
-    // Store the last used key for re-login
-    let recentKeys = JSON.parse(localStorage.getItem('recentLicenseKeys') || '[]');
-    
-    // Check license key
+    // Check  key
     function checkLicenseStatus() {
       const savedKey = localStorage.getItem('licenseKey');
       const expiryTime = localStorage.getItem('licenseExpiry');
@@ -712,10 +659,10 @@
         mainApp.style.display = 'flex';
         initApp();
       } else {
-        // No valid license, show key modal
+        // No valid license, show key
         showKeyModal();
         
-        // Clear expired key but keep for re-login
+        // Clear expired key
         if (savedKey) {
           localStorage.removeItem('licenseKey');
           localStorage.removeItem('licenseExpiry');
@@ -723,50 +670,18 @@
       }
     }
     
-    // Show key modal
+    // Show key
     function showKeyModal() {
-      // Pre-fill with last used key if available
-      if (recentKeys.length > 0) {
-        document.getElementById('licenseKeyInput').value = recentKeys[0];
-      }
-      
       keyModal.classList.add('show');
       mainApp.style.display = 'none';
     }
     
-    // Add a key to recent keys
-    function addToRecentKeys(key) {
-      // Remove if already exists
-      const index = recentKeys.indexOf(key);
-      if (index !== -1) {
-        recentKeys.splice(index, 1);
-      }
-      
-      // Add to beginning of array
-      recentKeys.unshift(key);
-      
-      // Keep only last 5 keys
-      if (recentKeys.length > 5) {
-        recentKeys = recentKeys.slice(0, 5);
-      }
-      
-      // Save to localStorage
-      localStorage.setItem('recentLicenseKeys', JSON.stringify(recentKeys));
-    }
-    
-    // Close modal - FIXED THE TYPO HERE
+    // Close 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('show');
     }
     
-    // Handle Enter key press in license input
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        validateLicenseKey();
-      }
-    }
-    
-    // Validate license key
+    // Validate key
     function validateLicenseKey() {
       const key = document.getElementById('licenseKeyInput').value.trim();
       
@@ -776,94 +691,57 @@
         return;
       }
       
-      // Show loading state
-      keySpinner.style.display = 'inline-block';
-      validateBtn.disabled = true;
       accessMessage.textContent = "Validating key...";
       accessMessage.style.color = "#ffd54f";
       
-      // Set timeout to prevent hanging
-      const timeoutPromise = new Promise((resolve, reject) => {
-        setTimeout(() => {
-          reject(new Error("Validation timeout. Please check your connection."));
-        }, 10000); // 10 second timeout
-      });
-      
       // Check key in Firebase
-      const validationPromise = licenseDb.ref('users/' + key).once('value').then(snapshot => {
+      licenseDb.ref('users/' + key).once('value').then(snapshot => {
         if (snapshot.exists()) {
           const keyData = snapshot.val();
           const now = Date.now();
           
           if (keyData.expiresAt > now) {
             // Key is valid
-            // Check if this device has already used this key
-            const deviceId = localStorage.getItem('deviceId') || generateDeviceId();
-            localStorage.setItem('deviceId', deviceId);
-            
-            if (keyData.userLimit && keyData.chatId && keyData.chatId !== deviceId) {
-              // Key is assigned to another device
-              throw new Error("This key is already assigned to another user");
+            if (keyData.userLimit && keyData.chatId) {
+              // Key is already in use
+              accessMessage.textContent = "This key is already assigned to another user";
+              accessMessage.style.color = "#ff5252";
             } else {
-              // Add to recent keys
-              addToRecentKeys(key);
-              
-              // Save key to localStorage
+              // Save key 
               localStorage.setItem('licenseKey', key);
               localStorage.setItem('licenseExpiry', keyData.expiresAt);
               
-              // If user limit is enabled, mark this key as used with this device ID
+              // If user limit is enabled, mark this key as used
               if (keyData.userLimit) {
                 licenseDb.ref('users/' + key).update({
-                  chatId: deviceId,
-                  activationDate: now,
-                  lastUsed: now
-                }).catch(error => {
-                  console.error("Error updating key usage:", error);
-                  // Continue even if update fails
+                  chatId: 'user_' + Math.random().toString(36).substr(2, 9),
+                  activationDate: now
                 });
               }
               
-              return { success: true, message: "License key accepted! Access granted." };
+              accessMessage.textContent = "License key accepted! Access granted.";
+              accessMessage.style.color = "#76ff03";
+              
+              setTimeout(() => {
+                closeModal('keyModal');
+                mainApp.style.display = 'flex';
+                initApp();
+              }, 1500);
             }
           } else {
             // Key has expired
-            throw new Error("This license key has expired");
+            accessMessage.textContent = "This license key has expired";
+            accessMessage.style.color = "#ff5252";
           }
         } else {
           // Key doesn't exist
-          throw new Error("Invalid license key");
-        }
-      });
-      
-      // Race between validation and timeout
-      Promise.race([validationPromise, timeoutPromise])
-        .then(result => {
-          keySpinner.style.display = 'none';
-          validateBtn.disabled = false;
-          
-          if (result.success) {
-            accessMessage.textContent = result.message;
-            accessMessage.style.color = "#76ff03";
-            
-            setTimeout(() => {
-              closeModal('keyModal');
-              mainApp.style.display = 'flex';
-              initApp();
-            }, 1500);
-          }
-        })
-        .catch(error => {
-          keySpinner.style.display = 'none';
-          validateBtn.disabled = false;
-          accessMessage.textContent = error.message;
+          accessMessage.textContent = "Invalid license key";
           accessMessage.style.color = "#ff5252";
-        });
-    }
-    
-    // Generate a unique device ID
-    function generateDeviceId() {
-      return 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+        }
+      }).catch(error => {
+        accessMessage.textContent = "Error validating key: " + error.message;
+        accessMessage.style.color = "#ff5252";
+      });
     }
     
     // Contact developer
@@ -886,18 +764,18 @@
       }, 3000);
     }
     
-    // Load pattern map from hardcoded data
+    // Load patter map
     function loadPatternMap() {
       spinner.style.display = 'block';
-      statusEl.textContent = "Loading pattern data...";
+      statusEl.textContent = "Loading pattern data from Firebase...";
       
-      // Hardcoded pattern map (no longer loaded from Firebase)
+      //pattern
       patternMap = {
-        "BBBSB": "S",
         "SBSSB": "B",
         "BSSBS": "B",
         "BSBBS": "B",
         "BBSBS": "S",
+        "BBBSB": "B",
         "BBBBB": "B",
         "BBBBS": "S",
         "SBBSS": "S",
@@ -979,231 +857,169 @@
       
       // Check if pattern exists
       if (patternMap[lastFive]) {
-        let prediction = patternMap[lastFive];
+        let predictionValue = patternMap[lastFive];
+        const shouldReverse = shouldReversePrediction();
         
-        // Apply reversal logic if needed
-        if (shouldReversePrediction()) {
-          prediction = prediction === 'B' ? 'S' : 'B';
+        //reverse logic
+        if (shouldReverse) {
+          predictionValue = predictionValue === 'B' ? 'S' : 'B';
         }
         
-        return {
-          pattern: lastFive,
-          prediction: prediction,
-          confidence: 'High',
-          reversed: shouldReversePrediction()
+        const displayValue = predictionValue === 'B' ? 'BIG' : 'SMALL';
+        const confidence = 100;
+        
+        return { 
+          pattern: lastFive, 
+          value: predictionValue, 
+          displayValue: displayValue,
+          confidence: confidence,
+          reversed: shouldReverse
         };
       }
       
       return null;
     }
     
-    // Update prediction
-    function updatePrediction() {
-      if (inputDigits.length < patternLength) {
-        predictionEl.textContent = '?';
-        confidenceEl.textContent = 'Enter more digits for prediction';
-        return;
-      }
-      
-      const match = findBestMatch();
-      
-      if (match) {
-        predictionEl.textContent = match.prediction;
-        confidenceEl.textContent = `Pattern: ${match.pattern} | Confidence: ${match.confidence}`;
-        if (match.reversed) {
-          confidenceEl.textContent += ' (Reversed due to losses)';
-        }
-        noMatchEl.style.display = 'none';
-      } else {
-        predictionEl.textContent = '?';
-        confidenceEl.textContent = 'No matching pattern found';
-        noMatchEl.style.display = 'block';
-      }
-    }
-    
-    // Add digit to pattern
-    function addDigit(digit) {
+    // Show prediction result
+    function showResult() {
       if (isProcessing) return;
       
-      inputDigits.push(digit);
-      if (inputDigits.length > patternLength) {
-        inputDigits.shift(); // Keep only last 13 digits
-      }
+      isProcessing = true;
+      spinner.style.display = 'block';
+      predictionEl.textContent = '?';
+      confidenceEl.textContent = 'Analyzing pattern...';
+      statusEl.textContent = "Connecting to AI server...";
+      noMatchEl.style.display = 'none';
       
-      updatePatternDisplay();
-      updatePrediction();
-      
-      // Save to localStorage
-      localStorage.setItem('inputDigits', JSON.stringify(inputDigits));
+      setTimeout(() => {
+        const match = findBestMatch();
+        
+        if (match) {
+          predictionEl.textContent = match.displayValue;
+          let confidenceText = `Confidence: ${match.confidence}%`;
+          
+          if (match.reversed) {
+            confidenceText += " (Reversed Prediction)";
+          }
+          
+          confidenceEl.textContent = confidenceText;
+          confidenceEl.style.color = match.confidence > 70 ? '#76ff03' : 
+                                  match.confidence > 50 ? '#ffd54f' : '#ff5252';
+          
+          statusEl.textContent = "Prediction complete";
+          noMatchEl.style.display = 'none';
+          showNotification(`Prediction: ${match.displayValue}${match.reversed ? ' (Reversed)' : ''}`, "success");
+        } else {
+          predictionEl.textContent = '?';
+          confidenceEl.textContent = '';
+          statusEl.textContent = "No matching pattern found";
+          noMatchEl.style.display = 'block';
+          showNotification("No matching pattern found", "warning");
+        }
+        
+        spinner.style.display = 'none';
+        isProcessing = false;
+      }, 1500);
     }
     
-    // Delete last digit
-    function deleteLastDigit() {
-      if (isProcessing || inputDigits.length === 0) return;
-      
-      inputDigits.pop();
+    // Handle digit input
+    function handleInput(val) {
+      if (inputDigits.length >= patternLength) {
+        inputDigits.shift();
+      }
+      inputDigits.push(val);
       updatePatternDisplay();
-      updatePrediction();
-      
-      // Save to localStorage
-      localStorage.setItem('inputDigits', JSON.stringify(inputDigits));
+      showNotification(`Added ${val} to pattern`, "info");
+  
+      if (inputDigits.length === patternLength) {
+        showResult();
+      } else {
+        predictionEl.textContent = '?';
+        confidenceEl.textContent = '';
+        statusEl.textContent = `Enter ${patternLength - inputDigits.length} more digits`;
+        noMatchEl.style.display = 'none';
+      }
+    }
+    
+    // Delete last input
+    function deleteLastInput() {
+      if (inputDigits.length > 0) {
+        const removed = inputDigits.pop();
+        updatePatternDisplay();
+        showNotification(`Removed ${removed} from pattern`, "info");
+        
+        predictionEl.textContent = '?';
+        confidenceEl.textContent = '';
+        noMatchEl.style.display = 'none';
+        
+        // Update status message
+        if (inputDigits.length === 0) {
+          statusEl.textContent = "Enter (B/S) for prediction";
+        } else {
+          statusEl.textContent = `Enter ${patternLength - inputDigits.length} more digits`;
+        }
+      } else {
+        showNotification("No digits to delete", "warning");
+      }
     }
     
     // Clear all data
     function clearAllData() {
-      if (isProcessing) return;
-      
       inputDigits = [];
       updatePatternDisplay();
-      updatePrediction();
-      
-      // Save to localStorage
-      localStorage.setItem('inputDigits', JSON.stringify(inputDigits));
-      
+      predictionEl.textContent = '?';
+      confidenceEl.textContent = 'Waiting for pattern input...';
+      statusEl.textContent = "Enter (B/S) for prediction";
+      noMatchEl.style.display = 'none';
       showNotification("All data cleared", "success");
     }
     
-    // Mark result as win
-    function markWin() {
-      if (isProcessing) return;
-      
-      const match = findBestMatch();
-      if (!match) {
-        showNotification("No prediction to mark as win", "warning");
-        return;
-      }
-      
-      isProcessing = true;
-      spinner.style.display = 'block';
-      statusEl.textContent = "Processing win...";
-      
-      // Simulate processing
-      setTimeout(() => {
-        winCount++;
-        consecutiveLosses = 0; // Reset consecutive losses on win
-        
-        // Save counts
-        localStorage.setItem('winCount', winCount);
-        localStorage.setItem('loseCount', loseCount);
-        localStorage.setItem('consecutiveLosses', consecutiveLosses);
-        
-        // Update UI
-        winCountEl.textContent = winCount;
-        loseCountEl.textContent = loseCount;
-        
-        spinner.style.display = 'none';
-        isProcessing = false;
-        statusEl.textContent = "Win recorded! Enter next pattern.";
-        
-        showNotification("Win recorded successfully", "success");
-      }, 1000);
-    }
-    
-    // Mark result as lose
-    function markLose() {
-      if (isProcessing) return;
-      
-      const match = findBestMatch();
-      if (!match) {
-        showNotification("No prediction to mark as lose", "warning");
-        return;
-      }
-      
-      isProcessing = true;
-      spinner.style.display = 'block';
-      statusEl.textContent = "Processing lose...";
-      
-      // Simulate processing
-      setTimeout(() => {
-        loseCount++;
-        consecutiveLosses++; // Increment consecutive losses
-        
-        // Save counts
-        localStorage.setItem('winCount', winCount);
-        localStorage.setItem('loseCount', loseCount);
-        localStorage.setItem('consecutiveLosses', consecutiveLosses);
-        
-        // Update UI
-        winCountEl.textContent = winCount;
-        loseCountEl.textContent = loseCount;
-        
-        spinner.style.display = 'none';
-        isProcessing = false;
-        statusEl.textContent = "Lose recorded! Enter next pattern.";
-        
-        showNotification("Lose recorded. Loss streak: " + consecutiveLosses, "warning");
-      }, 1000);
-    }
-    
-    // Initialize app
-    function initApp() {
-      // Load saved data
-      const savedDigits = localStorage.getItem('inputDigits');
-      if (savedDigits) {
-        inputDigits = JSON.parse(savedDigits);
-      }
-      
-      winCount = parseInt(localStorage.getItem('winCount') || '0');
-      loseCount = parseInt(localStorage.getItem('loseCount') || '0');
-      consecutiveLosses = parseInt(localStorage.getItem('consecutiveLosses') || '0');
-      
-      // Update UI
+    // Handle win
+    function handleWin() {
+      winCount++;
       winCountEl.textContent = winCount;
+      showNotification("Win recorded!", "success");
+      
+      // Reduce lose count by 1
+      if (loseCount > 0) {
+        loseCount--;
+        loseCountEl.textContent = loseCount;
+      }
+      
+      // Reset
+      consecutiveLosses = 0;
+    }
+    
+    // Handle lose
+    function handleLose() {
+      loseCount++;
       loseCountEl.textContent = loseCount;
-      updatePatternDisplay();
-      updatePrediction();
-      
-      // Set up event listeners
-      document.getElementById('btnBig').addEventListener('click', () => addDigit('B'));
-      document.getElementById('btnSmall').addEventListener('click', () => addDigit('S'));
-      document.getElementById('btnWin').addEventListener('click', markWin);
-      document.getElementById('btnLose').addEventListener('click', markLose);
-      document.getElementById('btnDelete').addEventListener('click', deleteLastDigit);
-      document.getElementById('btnClear').addEventListener('click', clearAllData);
-      
-      // Set up menu toggle
-      document.querySelector('.menu-btn').addEventListener('click', function() {
-        document.getElementById('topMenu').classList.toggle('show');
-      });
-      
-      // Load pattern map
-      loadPatternMap();
-    }
-    
-    // Check remaining key time
-    function checkKeyTime() {
-      const expiryTime = localStorage.getItem('licenseExpiry');
-      if (!expiryTime) {
-        showNotification("No active license key found", "error");
-        return;
-      }
-      
-      const now = Date.now();
-      const remaining = parseInt(expiryTime) - now;
-      
-      if (remaining <= 0) {
-        showNotification("Your license key has expired", "error");
-        return;
-      }
-      
-      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      
-      showNotification(`License key valid for ${days} days and ${hours} hours`, "success");
-    }
-    
-    // Logout
-    function logout() {
-      localStorage.removeItem('licenseKey');
-      localStorage.removeItem('licenseExpiry');
-      showKeyModal();
-      showNotification("Logged out successfully", "info");
+      consecutiveLosses++;
+      showNotification("Loss recorded", "warning");
     }
     
     // Initialize the app
-    document.addEventListener('DOMContentLoaded', function() {
-      checkLicenseStatus();
-    });
+    function initApp() {
+      // Initialize pattern display
+      updatePatternDisplay();
+      
+      // Set up event listeners
+      document.getElementById('btnBig').addEventListener('click', () => handleInput('B'));
+      document.getElementById('btnSmall').addEventListener('click', () => handleInput('S'));
+      document.getElementById('btnWin').addEventListener('click', handleWin);
+      document.getElementById('btnLose').addEventListener('click', handleLose);
+      document.getElementById('btnDelete').addEventListener('click', deleteLastInput);
+      document.getElementById('btnClear').addEventListener('click', clearAllData);
+      
+      // Load pattern map
+      loadPatternMap();
+      
+      // Show welcome message
+      showNotification("Welcome to ZAW GYI-13DIGIT AI Predictor", "info");
+    }
+    
+    // Check license status on page load
+    document.addEventListener('DOMContentLoaded', checkLicenseStatus);
   </script>
 </body>
 </html>
