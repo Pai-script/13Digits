@@ -446,6 +446,17 @@
       color: #b3e5fc;
       font-size: 0.9rem;
     }
+    .key-validation-spinner {
+      border: 2px solid rgba(79, 195, 247, 0.3);
+      border-top: 2px solid #4fc3f7;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
     
     @media (min-width: 768px) {
       .container {
@@ -519,7 +530,7 @@
           <label class="form-label">Enter License Key</label>
           <input type="text" id="licenseKeyInput" class="form-input" placeholder="Enter your license key">
         </div>
-        <button class="btn-key" onclick="validateLicenseKey()">
+        <button class="btn-key" onclick="validateLicenseKey()" id="validateKeyBtn">
           <i class="fas fa-unlock"></i>
           Validate Key
         </button>
@@ -628,7 +639,7 @@
     const licenseApp = firebase.initializeApp(licenseFirebaseConfig, "licenseData");
     const licenseDb = firebase.database(licenseApp);
     
-    // App variables
+
     let inputDigits = [];
     const patternLength = 13;
     let patternMap = {};
@@ -648,16 +659,19 @@
     const mainApp = document.getElementById('mainApp');
     const keyModal = document.getElementById('keyModal');
     const accessMessage = document.getElementById('accessMessage');
+    const validateKeyBtn = document.getElementById('validateKeyBtn');
+    const licenseKeyInput = document.getElementById('licenseKeyInput');
     
-    // Check if user has a valid license key
+    // Check license status
     function checkLicenseStatus() {
       const savedKey = localStorage.getItem('licenseKey');
       const expiryTime = localStorage.getItem('licenseExpiry');
       
       if (savedKey && expiryTime && Date.now() < parseInt(expiryTime)) {
-        // Valid license exists
+        // Valid license
         mainApp.style.display = 'flex';
         initApp();
+        return true;
       } else {
         // No valid license, show key modal
         showKeyModal();
@@ -667,6 +681,7 @@
           localStorage.removeItem('licenseKey');
           localStorage.removeItem('licenseExpiry');
         }
+        return false;
       }
     }
     
@@ -681,9 +696,9 @@
       document.getElementById(modalId).classList.remove('show');
     }
     
-    // Validate license key
+    // Validate license key with timeout
     function validateLicenseKey() {
-      const key = document.getElementById('licenseKeyInput').value.trim();
+      const key = licenseKeyInput.value.trim();
       
       if (!key) {
         accessMessage.textContent = "Please enter a license key";
@@ -691,57 +706,83 @@
         return;
       }
       
+      // Show loading state
+      validateKeyBtn.disabled = true;
+      validateKeyBtn.innerHTML = '<i class="fas fa-unlock"></i> Validating... <span class="key-validation-spinner"></span>';
       accessMessage.textContent = "Validating key...";
       accessMessage.style.color = "#ffd54f";
       
-      // Check key in Firebase
-      licenseDb.ref('users/' + key).once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          const keyData = snapshot.val();
-          const now = Date.now();
-          
-          if (keyData.expiresAt > now) {
-            // Key is valid
-            if (keyData.userLimit && keyData.chatId) {
-              // Key is already in use
-              accessMessage.textContent = "This key is already assigned to another user";
-              accessMessage.style.color = "#ff5252";
-            } else {
-              // Save key to localStorage
-              localStorage.setItem('licenseKey', key);
-              localStorage.setItem('licenseExpiry', keyData.expiresAt);
-              
-              // If user limit is enabled, mark this key as used
-              if (keyData.userLimit) {
-                licenseDb.ref('users/' + key).update({
-                  chatId: 'user_' + Math.random().toString(36).substr(2, 9),
-                  activationDate: now
-                });
+      // Set timeout for validation (8 seconds)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Validation timeout. Please check your connection.")), 8000)
+      );
+      
+      // Firebase validation
+      const validationPromise = licenseDb.ref('users/' + key).once('value');
+      
+      // Race between validation and timeout
+      Promise.race([validationPromise, timeoutPromise])
+        .then(snapshot => {
+          if (snapshot.exists()) {
+            const keyData = snapshot.val();
+            const now = Date.now();
+            
+            if (keyData.expiresAt > now) {
+              // Key is valid
+              if (keyData.userLimit && keyData.chatId) {
+                // Key is already in use
+                accessMessage.textContent = "This key is already assigned to another user";
+                accessMessage.style.color = "#ff5252";
+                resetValidationButton();
+              } else {
+                // Save key to localStorage
+                localStorage.setItem('licenseKey', key);
+                localStorage.setItem('licenseExpiry', keyData.expiresAt);
+                
+                // If user limit is enabled, mark this key as used
+                if (keyData.userLimit) {
+                  licenseDb.ref('users/' + key).update({
+                    chatId: 'user_' + Math.random().toString(36).substr(2, 9),
+                    activationDate: now
+                  }).catch(error => {
+                    console.error("Error updating key usage:", error);
+                  });
+                }
+                
+                accessMessage.textContent = "License key accepted! Access granted.";
+                accessMessage.style.color = "#76ff03";
+                
+                setTimeout(() => {
+                  closeModal('keyModal');
+                  mainApp.style.display = 'flex';
+                  initApp();
+                }, 1500);
               }
-              
-              accessMessage.textContent = "License key accepted! Access granted.";
-              accessMessage.style.color = "#76ff03";
-              
-              setTimeout(() => {
-                closeModal('keyModal');
-                mainApp.style.display = 'flex';
-                initApp();
-              }, 1500);
+            } else {
+              // Key has expired
+              accessMessage.textContent = "This license key has expired";
+              accessMessage.style.color = "#ff5252";
+              resetValidationButton();
             }
           } else {
-            // Key has expired
-            accessMessage.textContent = "This license key has expired";
+            // Key doesn't exist
+            accessMessage.textContent = "Invalid license key";
             accessMessage.style.color = "#ff5252";
+            resetValidationButton();
           }
-        } else {
-          // Key doesn't exist
-          accessMessage.textContent = "Invalid license key";
+        })
+        .catch(error => {
+          console.error("Validation error:", error);
+          accessMessage.textContent = error.message || "Error validating key. Please try again.";
           accessMessage.style.color = "#ff5252";
-        }
-      }).catch(error => {
-        accessMessage.textContent = "Error validating key: " + error.message;
-        accessMessage.style.color = "#ff5252";
-      });
+          resetValidationButton();
+        });
+    }
+    
+    // Reset validation button to original state
+    function resetValidationButton() {
+      validateKeyBtn.disabled = false;
+      validateKeyBtn.innerHTML = '<i class="fas fa-unlock"></i> Validate Key';
     }
     
     // Contact developer
@@ -769,7 +810,7 @@
       spinner.style.display = 'block';
       statusEl.textContent = "Loading pattern data from Firebase...";
       
-      //pattern map
+      // Hardcoded pattern map for faster loading
       patternMap = {
         "BBBSB": "S",
         "SBSSB": "B",
@@ -926,41 +967,48 @@
     // Handle digit input
     function handleInput(val) {
       if (inputDigits.length >= patternLength) {
-        inputDigits.shift();
+        showNotification("Maximum pattern length reached", "warning");
+        return;
       }
+      
       inputDigits.push(val);
       updatePatternDisplay();
-      showNotification(`Added ${val} to pattern`, "info");
-  
+      
       if (inputDigits.length === patternLength) {
         showResult();
       } else {
-        predictionEl.textContent = '?';
-        confidenceEl.textContent = '';
-        statusEl.textContent = `Enter ${patternLength - inputDigits.length} more digits`;
-        noMatchEl.style.display = 'none';
+        statusEl.textContent = `Enter pattern (${patternLength - inputDigits.length} remaining)`;
       }
     }
     
-    // Delete last input
-    function deleteLastInput() {
+    // Handle win
+    function handleWin() {
+      winCount++;
+      consecutiveLosses = Math.max(0, consecutiveLosses - 1);
+      winCountEl.textContent = winCount;
+      showNotification("Win recorded! Loss streak reduced", "success");
+      statusEl.textContent = "Win recorded! Loss streak reduced";
+    }
+    
+    // Handle lose
+    function handleLose() {
+      loseCount++;
+      consecutiveLosses++;
+      loseCountEl.textContent = loseCount;
+      showNotification("Loss recorded", "error");
+      statusEl.textContent = "Loss recorded";
+    }
+    
+    // Delete last digit
+    function deleteLastDigit() {
       if (inputDigits.length > 0) {
-        const removed = inputDigits.pop();
+        inputDigits.pop();
         updatePatternDisplay();
-        showNotification(`Removed ${removed} from pattern`, "info");
-        
-        predictionEl.textContent = '?';
-        confidenceEl.textContent = '';
+        statusEl.textContent = `Enter pattern (${patternLength - inputDigits.length} remaining)`;
         noMatchEl.style.display = 'none';
-        
-        // Update status message
-        if (inputDigits.length === 0) {
-          statusEl.textContent = "Enter (B/S) for prediction";
-        } else {
-          statusEl.textContent = `Enter ${patternLength - inputDigits.length} more digits`;
-        }
+        showNotification("Last digit removed", "info");
       } else {
-        showNotification("No digits to delete", "warning");
+        showNotification("No digits to remove", "warning");
       }
     }
     
@@ -972,55 +1020,37 @@
       confidenceEl.textContent = 'Waiting for pattern input...';
       statusEl.textContent = "Enter (B/S) for prediction";
       noMatchEl.style.display = 'none';
-      showNotification("All data cleared", "success");
+      showNotification("All data cleared", "info");
     }
     
-    // Handle win
-    function handleWin() {
-      winCount++;
-      winCountEl.textContent = winCount;
-      showNotification("Win recorded!", "success");
-      
-      // Reduce lose count by 1
-      if (loseCount > 0) {
-        loseCount--;
-        loseCountEl.textContent = loseCount;
-      }
-      
-      // Reset consecutive losses
-      consecutiveLosses = 0;
-    }
-    
-    // Handle lose
-    function handleLose() {
-      loseCount++;
-      loseCountEl.textContent = loseCount;
-      consecutiveLosses++;
-      showNotification("Loss recorded", "warning");
-    }
-    
-    // Initialize the app
+    // Initialize app
     function initApp() {
-      // Initialize pattern display
-      updatePatternDisplay();
+      // Load pattern map
+      loadPatternMap();
       
       // Set up event listeners
       document.getElementById('btnBig').addEventListener('click', () => handleInput('B'));
       document.getElementById('btnSmall').addEventListener('click', () => handleInput('S'));
       document.getElementById('btnWin').addEventListener('click', handleWin);
       document.getElementById('btnLose').addEventListener('click', handleLose);
-      document.getElementById('btnDelete').addEventListener('click', deleteLastInput);
+      document.getElementById('btnDelete').addEventListener('click', deleteLastDigit);
       document.getElementById('btnClear').addEventListener('click', clearAllData);
       
-      // Load pattern map
-      loadPatternMap();
+      // Initialize display
+      updatePatternDisplay();
+      winCountEl.textContent = winCount;
+      loseCountEl.textContent = loseCount;
       
-      // Show welcome message
-      showNotification("Welcome to ZAW GYI-13DIGIT AI Predictor", "info");
+      showNotification("App initialized successfully", "success");
     }
     
     // Check license status on page load
-    document.addEventListener('DOMContentLoaded', checkLicenseStatus);
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!checkLicenseStatus()) {
+        // If no valid license, show the key modal
+        showKeyModal();
+      }
+    });
   </script>
 </body>
 </html>
