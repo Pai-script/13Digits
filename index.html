@@ -613,7 +613,7 @@
   </div>
 
   <script>
-    // Firebase configuration for license keys
+    // Firebase configuration for license keys only
     const licenseFirebaseConfig = {
       apiKey: "AIzaSyBNDFi-i58PXRAu0w57armj_Dpn42X6i5g",
       authDomain: "admin-panel-17295.firebaseapp.com",
@@ -625,26 +625,10 @@
       measurementId: "G-63JZ6YDWXQ"
     };
     
-    // Firebase configuration for app data
-    const firebaseConfig = {
-      apiKey: "AIzaSyAaqQUWLbb1SV64xsJ0CG7_jKW1PzD0MpA",
-      authDomain: "zawaung-17bf0.firebaseapp.com",
-      databaseURL: "https://zawaung-17bf0-default-rtdb.firebaseio.com",
-      projectId: "zawaung-17bf0",
-      storageBucket: "zawaung-17bf0.appspot.com",
-      messagingSenderId: "1029965895021",
-      appId: "1:1029965895021:web:e461ae53aaabcc9e527664"
-    };
-    
-    // Initialize Firebase for app data
-    firebase.initializeApp(firebaseConfig, "appData");
-    const db = firebase.database(firebase.app("appData"));
-    
-    // Initialize Firebase for license keys
+    // Initialize Firebase for license keys only
     const licenseApp = firebase.initializeApp(licenseFirebaseConfig, "licenseData");
     const licenseDb = firebase.database(licenseApp);
     
-
     let inputDigits = [];
     const patternLength = 13;
     let patternMap = {};
@@ -667,7 +651,7 @@
     const keySpinner = document.getElementById('keySpinner');
     const validateBtn = document.getElementById('validateBtn');
     
-    // Check  key
+    // Check license key
     function checkLicenseStatus() {
       const savedKey = localStorage.getItem('licenseKey');
       const expiryTime = localStorage.getItem('licenseExpiry');
@@ -677,7 +661,7 @@
         mainApp.style.display = 'flex';
         initApp();
       } else {
-        // No valid license, show key
+        // No valid license, show key modal
         showKeyModal();
         
         // Clear expired key
@@ -688,13 +672,13 @@
       }
     }
     
-    // Show key
+    // Show key modal
     function showKeyModal() {
       keyModal.classList.add('show');
       mainApp.style.display = 'none';
     }
     
-    // Close 
+    // Close modal
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('show');
     }
@@ -706,7 +690,7 @@
       }
     }
     
-    // Validate key
+    // Validate license key
     function validateLicenseKey() {
       const key = document.getElementById('licenseKeyInput').value.trim();
       
@@ -741,7 +725,7 @@
               // Key is already in use
               throw new Error("This key is already assigned to another user");
             } else {
-              // Save key 
+              // Save key to localStorage
               localStorage.setItem('licenseKey', key);
               localStorage.setItem('licenseExpiry', keyData.expiresAt);
               
@@ -813,19 +797,18 @@
       }, 3000);
     }
     
-    // Load patter map
+    // Load pattern map from hardcoded data
     function loadPatternMap() {
       spinner.style.display = 'block';
-      statusEl.textContent = "Loading pattern data from Firebase...";
+      statusEl.textContent = "Loading pattern data...";
       
-      //pattern
+      // Hardcoded pattern map (no longer loaded from Firebase)
       patternMap = {
         "BBBSB": "S",
         "SBSSB": "B",
         "BSSBS": "B",
         "BSBBS": "B",
         "BBSBS": "S",
-        "BBBSB": "B",
         "BBBBB": "B",
         "BBBBS": "S",
         "SBBSS": "S",
@@ -910,7 +893,7 @@
         let predictionValue = patternMap[lastFive];
         const shouldReverse = shouldReversePrediction();
         
-        //reverse logic
+        // Apply reverse logic if needed
         if (shouldReverse) {
           predictionValue = predictionValue === 'B' ? 'S' : 'B';
         }
@@ -938,7 +921,7 @@
       spinner.style.display = 'block';
       predictionEl.textContent = '?';
       confidenceEl.textContent = 'Analyzing pattern...';
-      statusEl.textContent = "Connecting to AI server...";
+      statusEl.textContent = "Processing pattern...";
       noMatchEl.style.display = 'none';
       
       setTimeout(() => {
@@ -1039,8 +1022,8 @@
       localStorage.setItem('consecutiveLosses', consecutiveLosses);
     }
     
-    // Load saved data
-    function loadSavedData() {
+    // Load saved stats
+    function loadStats() {
       const savedWinCount = localStorage.getItem('winCount');
       const savedLoseCount = localStorage.getItem('loseCount');
       const savedConsecutiveLosses = localStorage.getItem('consecutiveLosses');
@@ -1055,10 +1038,10 @@
     // Initialize app
     function initApp() {
       loadPatternMap();
+      loadStats();
       updatePatternDisplay();
-      loadSavedData();
       
-      // Add event listeners
+      // Set up event listeners
       document.getElementById('btnBig').addEventListener('click', () => handleInput('B'));
       document.getElementById('btnSmall').addEventListener('click', () => handleInput('S'));
       document.getElementById('btnWin').addEventListener('click', handleWin);
@@ -1066,10 +1049,21 @@
       document.getElementById('btnDelete').addEventListener('click', deleteLast);
       document.getElementById('btnClear').addEventListener('click', clearAllData);
       
-      showNotification("App initialized successfully", "success");
+      // Keyboard support
+      document.addEventListener('keydown', (e) => {
+        if (e.key.toUpperCase() === 'B') {
+          handleInput('B');
+        } else if (e.key.toUpperCase() === 'S') {
+          handleInput('S');
+        } else if (e.key === 'Backspace') {
+          deleteLast();
+        } else if (e.key === 'Delete') {
+          clearAllData();
+        }
+      });
     }
     
-    // Start app by checking license
+    // Start the app by checking license status
     checkLicenseStatus();
   </script>
 </body>
