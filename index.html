@@ -19,6 +19,7 @@
       font-family: 'Share Tech Mono', monospace;
       background: linear-gradient(135deg, #0a1929, #142850);
       color: #00ffcc;
+      touch-action: manipulation;
     }
     .container {
       max-width: 96%;
@@ -36,17 +37,31 @@
       border-bottom: 2px solid rgba(0, 255, 204, 0.3);
       text-align: center;
       animation: fadeIn 1s ease;
+      position: relative;
     }
     h1 {
       color: #4fc3f7;
       font-size: 1.6rem;
-      margin-bottom: -2px;
+      margin-bottom: 5px;
       letter-spacing: 3px;
     }
     .subtitle {
       color: #e0f7fa;
       font-size: 0.9rem;
-      margin-bottom: -2px;
+      margin-bottom: 10px;
+    }
+    .header-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn-sound {
+      background: linear-gradient(135deg, #448aff, #2979ff);
+    }
+
+    .btn-key-time {
+      background: linear-gradient(135deg, #b388ff, #7c4dff);
     }
     .content {
       flex-grow: 1;
@@ -179,6 +194,14 @@
       justify-content: center;
       font-weight: bold;
     }
+    .prediction.win {
+      color: #76ff03;
+      text-shadow: 0 0 15px rgba(118, 255, 3, 0.8);
+    }
+    .prediction.lose {
+      color: #ff5252;
+      text-shadow: 0 0 15px rgba(255, 82, 82, 0.8);
+    }
     .confidence {
       font-size: 1.2rem;
       color: #ffd54f;
@@ -205,6 +228,9 @@
       justify-content: center;
       border: none;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      touch-action: manipulation;
+      pointer-events: auto;
+      z-index: 2000;
     }
     .btn-big {
       background: linear-gradient(135deg, #ff5252, #d32f2f);
@@ -273,7 +299,7 @@
       padding: 15px 20px;
       border-radius: 8px;
       color: white;
-      z-index: 1000;
+      z-index: 3000;
       opacity: 0;
       transform: translateX(100px);
       transition: all 0.3s ease;
@@ -309,8 +335,6 @@
       gap: 8px;
       margin-top: 10px;
     }
-    
-    /* Key Access Modal Styles */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -367,8 +391,10 @@
       padding: 5px;
       border-radius: 6px;
       transition: all 0.3s ease;
+      touch-action: manipulation;
+      pointer-events: auto;
     }
-    .modal-close:hover {
+    .modal-close:hover, .modal-close:active {
       background: rgba(79, 195, 247, 0.2);
     }
     .modal-body {
@@ -417,8 +443,10 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      touch-action: manipulation;
+      pointer-events: auto;
     }
-    .btn-key:hover {
+    .btn-key:hover, .btn-key:active {
       background: linear-gradient(135deg, #0091ea, #0077c2);
     }
     .btn-contact {
@@ -436,8 +464,10 @@
       margin-top: 15px;
       width: 100%;
       justify-content: center;
+      touch-action: manipulation;
+      pointer-events: auto;
     }
-    .btn-contact:hover {
+    .btn-contact:hover, .btn-contact:active {
       background: linear-gradient(135deg, #3a0ca3, #7209b7);
     }
     .access-message {
@@ -446,13 +476,38 @@
       color: #b3e5fc;
       font-size: 0.9rem;
     }
-    
-    @media (min-width: 768px) {
+    @media (min-width: 1200px) {
+      .container {
+        max-width: 600px;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+      .subtitle {
+        font-size: 1rem;
+      }
+      .digit {
+        width: 40px;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+      .btn {
+        font-size: 1.3rem;
+        padding: 16px 8px;
+      }
+      .prediction {
+        font-size: 4rem;
+      }
+    }
+    @media (min-width: 768px) and (max-width: 1199px) {
       .container {
         max-width: 500px;
       }
       h1 {
         font-size: 2rem;
+      }
+      .subtitle {
+        font-size: 0.9rem;
       }
       .digit {
         width: 38px;
@@ -463,10 +518,88 @@
         font-size: 1.2rem;
         padding: 16px 5px;
       }
+      .prediction {
+        font-size: 3.5rem;
+      }
+    }
+    @media (max-width: 767px) {
+      .container {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+      .subtitle {
+        font-size: 0.8rem;
+      }
+      .digit {
+        width: 28px;
+        height: 38px;
+        font-size: 1rem;
+      }
+      .btn {
+        font-size: 1rem;
+        padding: 12px 5px;
+      }
+      .prediction {
+        font-size: 2.5rem;
+      }
+      .notification {
+        max-width: 80%;
+        right: 10px;
+        top: 10px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+      .header-controls {
+        gap: 8px;
+      }
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 8px;
+      }
+      h1 {
+        font-size: 1.2rem;
+      }
+      .subtitle {
+        font-size: 0.7rem;
+      }
+      .digit {
+        width: 24px;
+        height: 34px;
+        font-size: 0.9rem;
+      }
+      .btn {
+        font-size: 0.9rem;
+        padding: 10px 4px;
+      }
+      .prediction {
+        font-size: 2rem;
+      }
+      .confidence {
+        font-size: 1rem;
+      }
+      .stats-container {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .stat-box {
+        height: 70px;
+      }
+      .stat-title {
+        font-size: 1rem;
+      }
+      .stat-value {
+        font-size: 1.3rem;
+      }
+      .header-controls {
+        gap: 6px;
+      }
     }
     @media (max-height: 700px) {
       .container {
-        gap: 10px;
+        gap: 8px;
       }
       .header {
         margin-bottom: 5px;
@@ -502,7 +635,10 @@
     <span class="notification-text"></span>
   </div>
   
-  <!-- Key Access Modal -->
+  <audio id="notificationSound" src="https://www.soundjay.com/buttons/button-09a.mp3" preload="auto"></audio>
+  <audio id="winSound" src="https://www.soundjay.com/buttons/button-3.mp3" preload="auto"></audio>
+  <audio id="loseSound" src="https://www.soundjay.com/buttons/button-10.mp3" preload="auto"></audio>
+  
   <div class="modal-overlay" id="keyModal">
     <div class="modal">
       <div class="modal-header">
@@ -538,16 +674,20 @@
     <div class="header">
       <h1><i class="head"></i> ZAW GYI/PAI-13DIGIT AI</h1>
       <div class="subtitle">AI Matching Predictor with Enhanced Win/Lose Logic</div>
+      <div class="header-controls">
+        <button class="btn btn-sound" id="soundToggle" style="font-size: 1rem; padding: 10px;"><i class="fas fa-volume-up"></i> Sound On</button>
+        <button class="btn btn-key-time" id="keyTimeBtn"style="font-size: 1rem; padding: 10px;"><i class="fas fa-clock"></i> Check Key's Time</button>
+      </div>
     </div>
     
     <div class="content">
       <div class="stats-container">
         <div class="stat-box">
-          <div class="stat-title">WIN STREAK</div>
+          <div class="stat-title">WIN COUNT</div>
           <div class="stat-value win" id="winCount">0</div>
         </div>
         <div class="stat-box">
-          <div class="stat-title">LOSE STREAK</div>
+          <div class="stat-title">LOSE COUNT</div>
           <div class="stat-value lose" id="loseCount">0</div>
         </div>
       </div>
@@ -558,9 +698,7 @@
         </div>
       </div>
       
-      <div class="pattern-display" id="patternDisplay">
-        <!-- Digits addhere -->
-      </div>
+      <div class="pattern-display" id="patternDisplay"></div>
       
       <div class="no-match" id="noMatchMessage">
         <i class="fas fa-exclamation-triangle"></i> No matching pattern in AI
@@ -591,13 +729,11 @@
     
     <div class="footer">
       <i class="fas fa-copyright"></i> AI Prediction System 2025 | Win reduces lose count by 1
-      <div style="margin-top: 5px;">
-      </div>
+      <div style="margin-top: 5px;"></div>
     </div>
   </div>
 
   <script>
-    // Firebase configuration for license keys
     const licenseFirebaseConfig = {
       apiKey: "AIzaSyBNDFi-i58PXRAu0w57armj_Dpn42X6i5g",
       authDomain: "admin-panel-17295.firebaseapp.com",
@@ -609,7 +745,6 @@
       measurementId: "G-63JZ6YDWXQ"
     };
     
-    // Firebase configuration for app data
     const firebaseConfig = {
       apiKey: "AIzaSyAaqQUWLbb1SV64xsJ0CG7_jKW1PzD0MpA",
       authDomain: "zawaung-17bf0.firebaseapp.com",
@@ -620,22 +755,21 @@
       appId: "1:1029965895021:web:e461ae53aaabcc9e527664"
     };
     
-    // Initialize Firebase for app data
     firebase.initializeApp(firebaseConfig, "appData");
     const db = firebase.database(firebase.app("appData"));
-    
-    // Initialize Firebase for license keys
     const licenseApp = firebase.initializeApp(licenseFirebaseConfig, "licenseData");
     const licenseDb = firebase.database(licenseApp);
     
-
     let inputDigits = [];
     const patternLength = 13;
     let patternMap = {};
     let isProcessing = false;
     let winCount = 0;
     let loseCount = 0;
-    let consecutiveLosses = 0; 
+    let consecutiveLosses = 0;
+    let isSoundEnabled = true;
+    let lastSoundToggle = 0;
+    let lastKeyTimeCheck = 0;
     const patternDisplay = document.getElementById('patternDisplay');
     const predictionEl = document.getElementById('prediction');
     const confidenceEl = document.getElementById('confidence');
@@ -648,21 +782,67 @@
     const mainApp = document.getElementById('mainApp');
     const keyModal = document.getElementById('keyModal');
     const accessMessage = document.getElementById('accessMessage');
+    const soundToggle = document.getElementById('soundToggle');
+    const keyTimeBtn = document.getElementById('keyTimeBtn');
+    const notificationSound = document.getElementById('notificationSound');
+    const winSound = document.getElementById('winSound');
+    const loseSound = document.getElementById('loseSound');
     
-    // Check  key
+    function toggleSound(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const now = Date.now();
+      if (now - lastSoundToggle < 300) {
+        console.log("Sound toggle debounced");
+        return;
+      }
+      lastSoundToggle = now;
+      isSoundEnabled = !isSoundEnabled;
+      soundToggle.innerHTML = `<i class="fas fa-volume-${isSoundEnabled ? 'up' : 'mute'}"></i> Sound ${isSoundEnabled ? 'On' : 'Off'}`;
+      showNotification(`Sound ${isSoundEnabled ? 'enabled' : 'disabled'}`, "info");
+      console.log(`Sound toggled to ${isSoundEnabled ? 'on' : 'off'}. Touch support: ${'ontouchstart' in window}`);
+    }
+    
+    function checkKeyTime(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const now = Date.now();
+      if (now - lastKeyTimeCheck < 300) {
+        console.log("Key time check debounced");
+        return;
+      }
+      lastKeyTimeCheck = now;
+      const expiryTime = localStorage.getItem('licenseExpiry');
+      if (expiryTime) {
+        const now = Date.now();
+        const expiry = parseInt(expiryTime);
+        if (now < expiry) {
+          const remainingMs = expiry - now;
+          const remainingDays = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+          const remainingHours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const remainingMinutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+          showNotification(`License valid for ${remainingDays} days, ${remainingHours} hours, ${remainingMinutes} minutes`, "info");
+        } else {
+          showNotification("License key has expired", "error");
+          mainApp.style.display = 'none';
+          showKeyModal();
+        }
+      } else {
+        showNotification("No valid license key found", "error");
+      }
+      console.log(`Key time checked. Touch support: ${'ontouchstart' in window}`);
+    }
+    
+    
     function checkLicenseStatus() {
       const savedKey = localStorage.getItem('licenseKey');
       const expiryTime = localStorage.getItem('licenseExpiry');
       
       if (savedKey && expiryTime && Date.now() < parseInt(expiryTime)) {
-        // Valid license
         mainApp.style.display = 'flex';
         initApp();
       } else {
-        // No valid license, show key
         showKeyModal();
-        
-        // Clear expired key
         if (savedKey) {
           localStorage.removeItem('licenseKey');
           localStorage.removeItem('licenseExpiry');
@@ -670,18 +850,15 @@
       }
     }
     
-    // Show key
     function showKeyModal() {
       keyModal.classList.add('show');
       mainApp.style.display = 'none';
     }
     
-    // Close 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('show');
     }
     
-    // Validate key
     function validateLicenseKey() {
       const key = document.getElementById('licenseKeyInput').value.trim();
       
@@ -694,24 +871,19 @@
       accessMessage.textContent = "Validating key...";
       accessMessage.style.color = "#ffd54f";
       
-      // Check key in Firebase
       licenseDb.ref('users/' + key).once('value').then(snapshot => {
         if (snapshot.exists()) {
           const keyData = snapshot.val();
           const now = Date.now();
           
           if (keyData.expiresAt > now) {
-            // Key is valid
             if (keyData.userLimit && keyData.chatId) {
-              // Key is already in use
               accessMessage.textContent = "This key is already assigned to another user";
               accessMessage.style.color = "#ff5252";
             } else {
-              // Save key 
               localStorage.setItem('licenseKey', key);
               localStorage.setItem('licenseExpiry', keyData.expiresAt);
               
-              // If user limit is enabled, mark this key as used
               if (keyData.userLimit) {
                 licenseDb.ref('users/' + key).update({
                   chatId: 'user_' + Math.random().toString(36).substr(2, 9),
@@ -729,12 +901,10 @@
               }, 1500);
             }
           } else {
-            // Key has expired
             accessMessage.textContent = "This license key has expired";
             accessMessage.style.color = "#ff5252";
           }
         } else {
-          // Key doesn't exist
           accessMessage.textContent = "Invalid license key";
           accessMessage.style.color = "#ff5252";
         }
@@ -744,12 +914,10 @@
       });
     }
     
-    // Contact developer
     function contactDeveloper() {
       window.open('https://t.me/leostrike223', '_blank');
     }
     
-    // Show notification
     function showNotification(message, type = 'info') {
       const icon = type === 'success' ? 'fa-check-circle' : 
                   type === 'error' ? 'fa-exclamation-circle' :
@@ -764,12 +932,37 @@
       }, 3000);
     }
     
-    // Load patter map
+    function playNotificationSound() {
+      if (isSoundEnabled) {
+        notificationSound.currentTime = 0;
+        notificationSound.play().catch(error => {
+          console.error("Error playing notification sound:", error);
+        });
+      }
+    }
+    
+    function playWinSound() {
+      if (isSoundEnabled) {
+        winSound.currentTime = 0;
+        winSound.play().catch(error => {
+          console.error("Error playing win sound:", error);
+        });
+      }
+    }
+    
+    function playLoseSound() {
+      if (isSoundEnabled) {
+        loseSound.currentTime = 0;
+        loseSound.play().catch(error => {
+          console.error("Error playing lose sound:", error);
+        });
+      }
+    }
+    
     function loadPatternMap() {
       spinner.style.display = 'block';
       statusEl.textContent = "Loading pattern data from Firebase...";
       
-      //pattern
       patternMap = {
         "SBSSB": "B",
         "BSSBS": "B",
@@ -787,13 +980,11 @@
         "SBSBB": "S",
         "SSBSB": "S",
         "BSBSS": "B",
-        "SBSBB": "S",
         "BBSSS": "S",
         "BBSSB": "B",
         "BSSBB": "S",
         "SSBBB": "B",
         "SBBBS": "B",
-        "BSBSS": "B",
         "BBBSS": "B",
         "BSSSB": "B",
         "SBBSB": "B",
@@ -801,7 +992,6 @@
         "BSBBB": "S",
         "SBBBB": "S",
         "SSBSS": "S",
-        "SSSBS": "B",
         "SBSSS": "B"
       };
       
@@ -812,11 +1002,9 @@
       showNotification("Pattern data loaded successfully", "success");
     }
     
-    // Update pattern display
     function updatePatternDisplay() {
       patternDisplay.innerHTML = '';
       
-      // Add entered digits
       inputDigits.forEach(d => {
         const digitEl = document.createElement('div');
         digitEl.className = `digit ${d}`;
@@ -824,7 +1012,6 @@
         patternDisplay.appendChild(digitEl);
       });
       
-      // Add placeholders for remaining digits
       const remaining = patternLength - inputDigits.length;
       for (let i = 0; i < remaining; i++) {
         const placeholder = document.createElement('div');
@@ -834,7 +1021,6 @@
       }
     }
     
-    // Determine if prediction should be reversed
     function shouldReversePrediction() {
       if (consecutiveLosses <= 0) return false;
       
@@ -842,25 +1028,21 @@
       const positionInCycle = (consecutiveLosses - 1) % 2;
       
       if (cycle % 2 === 1) {
-        return positionInCycle === 0; 
+        return positionInCycle === 0;
       } else {
-        return positionInCycle === 1; 
+        return positionInCycle === 1;
       }
     }
     
-    // Find best pattern match
     function findBestMatch() {
       if (inputDigits.length < patternLength) return null;
       
-      // Get last 5 digits
       const lastFive = inputDigits.slice(-5).join('');
       
-      // Check if pattern exists
       if (patternMap[lastFive]) {
         let predictionValue = patternMap[lastFive];
         const shouldReverse = shouldReversePrediction();
         
-        //reverse logic
         if (shouldReverse) {
           predictionValue = predictionValue === 'B' ? 'S' : 'B';
         }
@@ -868,9 +1050,9 @@
         const displayValue = predictionValue === 'B' ? 'BIG' : 'SMALL';
         const confidence = 100;
         
-        return { 
-          pattern: lastFive, 
-          value: predictionValue, 
+        return {
+          pattern: lastFive,
+          value: predictionValue,
           displayValue: displayValue,
           confidence: confidence,
           reversed: shouldReverse
@@ -880,13 +1062,13 @@
       return null;
     }
     
-    // Show prediction result
     function showResult() {
       if (isProcessing) return;
       
       isProcessing = true;
       spinner.style.display = 'block';
       predictionEl.textContent = '?';
+      predictionEl.classList.remove('win', 'lose');
       confidenceEl.textContent = 'Analyzing pattern...';
       statusEl.textContent = "Connecting to AI server...";
       noMatchEl.style.display = 'none';
@@ -896,6 +1078,7 @@
         
         if (match) {
           predictionEl.textContent = match.displayValue;
+          predictionEl.classList.remove('win', 'lose');
           let confidenceText = `Confidence: ${match.confidence}%`;
           
           if (match.reversed) {
@@ -903,18 +1086,21 @@
           }
           
           confidenceEl.textContent = confidenceText;
-          confidenceEl.style.color = match.confidence > 70 ? '#76ff03' : 
+          confidenceEl.style.color = match.confidence > 70 ? '#76ff03' :
                                   match.confidence > 50 ? '#ffd54f' : '#ff5252';
           
           statusEl.textContent = "Prediction complete";
           noMatchEl.style.display = 'none';
           showNotification(`Prediction: ${match.displayValue}${match.reversed ? ' (Reversed)' : ''}`, "success");
+          playNotificationSound();
         } else {
           predictionEl.textContent = '?';
+          predictionEl.classList.remove('win', 'lose');
           confidenceEl.textContent = '';
           statusEl.textContent = "No matching pattern found";
           noMatchEl.style.display = 'block';
           showNotification("No matching pattern found", "warning");
+          playNotificationSound();
         }
         
         spinner.style.display = 'none';
@@ -922,7 +1108,6 @@
       }, 1500);
     }
     
-    // Handle digit input
     function handleInput(val) {
       if (inputDigits.length >= patternLength) {
         inputDigits.shift();
@@ -935,13 +1120,13 @@
         showResult();
       } else {
         predictionEl.textContent = '?';
+        predictionEl.classList.remove('win', 'lose');
         confidenceEl.textContent = '';
         statusEl.textContent = `Enter ${patternLength - inputDigits.length} more digits`;
         noMatchEl.style.display = 'none';
       }
     }
     
-    // Delete last input
     function deleteLastInput() {
       if (inputDigits.length > 0) {
         const removed = inputDigits.pop();
@@ -949,10 +1134,10 @@
         showNotification(`Removed ${removed} from pattern`, "info");
         
         predictionEl.textContent = '?';
+        predictionEl.classList.remove('win', 'lose');
         confidenceEl.textContent = '';
         noMatchEl.style.display = 'none';
         
-        // Update status message
         if (inputDigits.length === 0) {
           statusEl.textContent = "Enter (B/S) for prediction";
         } else {
@@ -963,63 +1148,187 @@
       }
     }
     
-    // Clear all data
     function clearAllData() {
       inputDigits = [];
       updatePatternDisplay();
       predictionEl.textContent = '?';
+      predictionEl.classList.remove('win', 'lose');
       confidenceEl.textContent = 'Waiting for pattern input...';
       statusEl.textContent = "Enter (B/S) for prediction";
       noMatchEl.style.display = 'none';
       showNotification("All data cleared", "success");
     }
     
-    // Handle win
     function handleWin() {
       winCount++;
       winCountEl.textContent = winCount;
+      predictionEl.textContent = 'WIN';
+      predictionEl.classList.remove('lose');
+      predictionEl.classList.add('win');
+      confidenceEl.textContent = '';
       showNotification("Win recorded!", "success");
+      playWinSound();
       
-      // Reduce lose count by 1
       if (loseCount > 0) {
         loseCount--;
         loseCountEl.textContent = loseCount;
       }
       
-      // Reset
       consecutiveLosses = 0;
     }
     
-    // Handle lose
     function handleLose() {
       loseCount++;
       loseCountEl.textContent = loseCount;
-      consecutiveLosses++;
+      predictionEl.textContent = 'LOSE';
+      predictionEl.classList.remove('win');
+      predictionEl.classList.add('lose');
+      confidenceEl.textContent = '';
       showNotification("Loss recorded", "warning");
+      playLoseSound();
+      consecutiveLosses++;
     }
     
-    // Initialize the app
+    function handleKeyboardInput(e) {
+      const key = e.key.toUpperCase();
+      if (key === 'B') {
+        handleInput('B');
+      } else if (key === 'S') {
+        handleInput('S');
+      }
+    }
+    
     function initApp() {
-      // Initialize pattern display
       updatePatternDisplay();
       
-      // Set up event listeners
-      document.getElementById('btnBig').addEventListener('click', () => handleInput('B'));
-      document.getElementById('btnSmall').addEventListener('click', () => handleInput('S'));
-      document.getElementById('btnWin').addEventListener('click', handleWin);
-      document.getElementById('btnLose').addEventListener('click', handleLose);
-      document.getElementById('btnDelete').addEventListener('click', deleteLastInput);
-      document.getElementById('btnClear').addEventListener('click', clearAllData);
+      const btnBig = document.getElementById('btnBig');
+      const btnSmall = document.getElementById('btnSmall');
+      const btnWin = document.getElementById('btnWin');
+      const btnLose = document.getElementById('btnLose');
+      const btnDelete = document.getElementById('btnDelete');
+      const btnClear = document.getElementById('btnClear');
+      const soundToggle = document.getElementById('soundToggle');
+      const keyTimeBtn = document.getElementById('keyTimeBtn');
       
-      // Load pattern map
+      btnBig.removeEventListener('click', handleInput);
+      btnBig.removeEventListener('touchstart', handleInput);
+      btnSmall.removeEventListener('click', handleInput);
+      btnSmall.removeEventListener('touchstart', handleInput);
+      btnWin.removeEventListener('click', handleWin);
+      btnWin.removeEventListener('touchstart', handleWin);
+      btnLose.removeEventListener('click', handleLose);
+      btnLose.removeEventListener('touchstart', handleLose);
+      btnDelete.removeEventListener('click', deleteLastInput);
+      btnDelete.removeEventListener('touchstart', deleteLastInput);
+      btnClear.removeEventListener('click', clearAllData);
+      btnClear.removeEventListener('touchstart', clearAllData);
+      soundToggle.removeEventListener('click', toggleSound);
+      soundToggle.removeEventListener('touchstart', toggleSound);
+      keyTimeBtn.removeEventListener('click', checkKeyTime);
+      keyTimeBtn.removeEventListener('touchstart', checkKeyTime);
+      
+      btnBig.addEventListener('click', () => handleInput('B'));
+      btnBig.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput('B'); }, { passive: false });
+      btnSmall.addEventListener('click', () => handleInput('S'));
+      btnSmall.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput('S'); }, { passive: false });
+      btnWin.addEventListener('click', handleWin);
+      btnWin.addEventListener('touchstart', (e) => { e.preventDefault(); handleWin(); }, { passive: false });
+      btnLose.addEventListener('click', handleLose);
+      btnLose.addEventListener('touchstart', (e) => { e.preventDefault(); handleLose(); }, { passive: false });
+      btnDelete.addEventListener('click', deleteLastInput);
+      btnDelete.addEventListener('touchstart', (e) => { e.preventDefault(); deleteLastInput(); }, { passive: false });
+      btnClear.addEventListener('click', clearAllData);
+      btnClear.addEventListener('touchstart', (e) => { e.preventDefault(); clearAllData(); }, { passive: false });
+      soundToggle.addEventListener('click', toggleSound);
+      soundToggle.addEventListener('touchstart', toggleSound, { passive: false });
+      keyTimeBtn.addEventListener('click', checkKeyTime);
+      keyTimeBtn.addEventListener('touchstart', checkKeyTime, { passive: false });
+      
+      document.removeEventListener('keydown', handleKeyboardInput);
+      document.addEventListener('keydown', handleKeyboardInput);
+      
       loadPatternMap();
       
-      // Show welcome message
       showNotification("Welcome to ZAW GYI-13DIGIT AI Predictor", "info");
+      console.log("App initialized. Touch support: " + ('ontouchstart' in window));
     }
+
+    // ... existing code ...
+
+    function checkKeyTime(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const now = Date.now();
+      if (now - lastKeyTimeCheck < 300) {
+        console.log("Key time check debounced");
+        return;
+      }
+      lastKeyTimeCheck = now;
+      const expiryTime = localStorage.getItem('licenseExpiry');
+      if (expiryTime) {
+        const now = Date.now();
+        const expiry = parseInt(expiryTime);
+        if (now < expiry) {
+          const remainingMs = expiry - now;
+          const remainingDays = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+          const remainingHours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const remainingMinutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+          
+          // Show notification for 2 seconds instead of default 3
+          const notification = showNotification(`License valid for ${remainingDays} days, ${remainingHours} hours, ${remainingMinutes} minutes`, "info");
+          
+          // Clear after 2 seconds
+          setTimeout(() => {
+            if (notification && notification.classList) {
+              notification.classList.remove('show');
+            }
+          }, 2000);
+        } else {
+          const notification = showNotification("License key has expired", "error");
+          
+          // Clear after 2 seconds
+          setTimeout(() => {
+            if (notification && notification.classList) {
+              notification.classList.remove('show');
+            }
+          }, 2000);
+          
+          mainApp.style.display = 'none';
+          showKeyModal();
+        }
+      } else {
+        const notification = showNotification("No valid license key found", "error");
+        
+        // Clear after 2 seconds
+        setTimeout(() => {
+          if (notification && notification.classList) {
+            notification.classList.remove('show');
+          }
+        }, 2000);
+      }
+      console.log(`Key time checked. Touch support: ${'ontouchstart' in window}`);
+    }
+
+    // Modify the showNotification function to return the notification element
+    function showNotification(message, type = 'info') {
+      const icon = type === 'success' ? 'fa-check-circle' : 
+                  type === 'error' ? 'fa-exclamation-circle' :
+                  type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+      
+      notificationEl.innerHTML = `<i class="fas ${icon}"></i> <span class="notification-text">${message}</span>`;
+      notificationEl.className = `notification ${type}`;
+      notificationEl.classList.add('show');
+      
+      // Return the notification element so we can reference it later
+      return notificationEl;
+    }
+
+    // ... rest of the code ...
+
     
-    // Check license status on page load
-    document.addEventListener('DOMContentLoaded', checkLicenseStatus);
+    document.addEventListener('DOMContentLoaded', () => {
+      checkLicenseStatus();
+    });
   </script>
 </body>
 </html>
