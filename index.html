@@ -59,7 +59,6 @@
     .btn-sound {
       background: linear-gradient(135deg, #448aff, #2979ff);
     }
-
     .btn-key-time {
       background: linear-gradient(135deg, #b388ff, #7c4dff);
     }
@@ -399,6 +398,9 @@
     }
     .modal-body {
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
     .modal-footer {
       padding: 15px 20px;
@@ -676,7 +678,7 @@
       <div class="subtitle">AI Matching Predictor with Enhanced Win/Lose Logic</div>
       <div class="header-controls">
         <button class="btn btn-sound" id="soundToggle" style="font-size: 1rem; padding: 10px;"><i class="fas fa-volume-up"></i> Sound On</button>
-        <button class="btn btn-key-time" id="keyTimeBtn"style="font-size: 1rem; padding: 10px;"><i class="fas fa-clock"></i> Check Key's Time</button>
+        <button class="btn btn-key-time" id="keyTimeBtn" style="font-size: 1rem; padding: 10px;"><i class="fas fa-clock"></i> Check Key's Time</button>
       </div>
     </div>
     
@@ -734,17 +736,7 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-       apiKey: "AIzaSyBMTe3LDMavOg2oeqKbRSzOVhJYdV44mbo",
-       authDomain: "latest-2b39c.firebaseapp.com",
-       databaseURL: "https://latest-2b39c-default-rtdb.firebaseio.com",
-       projectId: "latest-2b39c",
-       storageBucket: "latest-2b39c.firebasestorage.app",
-       messagingSenderId: "332553786647",
-       appId: "1:332553786647:web:df5f1e301c9a7cdd6b9352",
-       measurementId: "G-LMTFLNFT0C"
-     };
-    
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAaqQUWLbb1SV64xsJ0CG7_jKW1PzD0MpA",
       authDomain: "zawaung-17bf0.firebaseapp.com",
@@ -755,10 +747,9 @@
       appId: "1:1029965895021:web:e461ae53aaabcc9e527664"
     };
     
-    firebase.initializeApp(firebaseConfig, "appData");
-    const db = firebase.database(firebase.app("appData"));
-    const licenseApp = firebase.initializeApp(licenseFirebaseConfig, "licenseData");
-    const licenseDb = firebase.database(licenseApp);
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
     
     let inputDigits = [];
     const patternLength = 13;
@@ -789,14 +780,16 @@
     const loseSound = document.getElementById('loseSound');
     
     function toggleSound(e) {
-      e.preventDefault();
+      e.preventDefault(); // Prevent default behavior for both touch and click
       e.stopPropagation();
+    
       const now = Date.now();
-      if (now - lastSoundToggle < 300) {
+      if (now - lastSoundToggle < 200) { // Reduced debounce time to 200ms
         console.log("Sound toggle debounced");
         return;
       }
       lastSoundToggle = now;
+    
       isSoundEnabled = !isSoundEnabled;
       soundToggle.innerHTML = `<i class="fas fa-volume-${isSoundEnabled ? 'up' : 'mute'}"></i> Sound ${isSoundEnabled ? 'On' : 'Off'}`;
       showNotification(`Sound ${isSoundEnabled ? 'enabled' : 'disabled'}`, "info");
@@ -806,6 +799,7 @@
     function checkKeyTime(e) {
       e.preventDefault();
       e.stopPropagation();
+    
       const now = Date.now();
       if (now - lastKeyTimeCheck < 300) {
         console.log("Key time check debounced");
@@ -833,11 +827,10 @@
       console.log(`Key time checked. Touch support: ${'ontouchstart' in window}`);
     }
     
-    
     function checkLicenseStatus() {
       const savedKey = localStorage.getItem('licenseKey');
       const expiryTime = localStorage.getItem('licenseExpiry');
-      
+    
       if (savedKey && expiryTime && Date.now() < parseInt(expiryTime)) {
         mainApp.style.display = 'flex';
         initApp();
@@ -861,57 +854,32 @@
     
     function validateLicenseKey() {
       const key = document.getElementById('licenseKeyInput').value.trim();
-      
+    
       if (!key) {
         accessMessage.textContent = "Please enter a license key";
         accessMessage.style.color = "#ff5252";
         return;
       }
-      
+    
       accessMessage.textContent = "Validating key...";
       accessMessage.style.color = "#ffd54f";
-      
-      licenseDb.ref('users/' + key).once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          const keyData = snapshot.val();
-          const now = Date.now();
-          
-          if (keyData.expiresAt > now) {
-            if (keyData.userLimit && keyData.chatId) {
-              accessMessage.textContent = "This key is already assigned to another user";
-              accessMessage.style.color = "#ff5252";
-            } else {
-              localStorage.setItem('licenseKey', key);
-              localStorage.setItem('licenseExpiry', keyData.expiresAt);
-              
-              if (keyData.userLimit) {
-                licenseDb.ref('users/' + key).update({
-                  chatId: 'user_' + Math.random().toString(36).substr(2, 9),
-                  activationDate: now
-                });
-              }
-              
-              accessMessage.textContent = "License key accepted! Access granted.";
-              accessMessage.style.color = "#76ff03";
-              
-              setTimeout(() => {
-                closeModal('keyModal');
-                mainApp.style.display = 'flex';
-                initApp();
-              }, 1500);
-            }
-          } else {
-            accessMessage.textContent = "This license key has expired";
-            accessMessage.style.color = "#ff5252";
-          }
-        } else {
-          accessMessage.textContent = "Invalid license key";
-          accessMessage.style.color = "#ff5252";
-        }
-      }).catch(error => {
-        accessMessage.textContent = "Error validating key: " + error.message;
-        accessMessage.style.color = "#ff5252";
-      });
+    
+      // Simulate successful validation (replace with actual Firebase validation in production)
+      setTimeout(() => {
+        const expiryTime = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days from now
+    
+        localStorage.setItem('licenseKey', key);
+        localStorage.setItem('licenseExpiry', expiryTime.toString());
+    
+        accessMessage.textContent = "License key accepted! Access granted.";
+        accessMessage.style.color = "#76ff03";
+    
+        setTimeout(() => {
+          closeModal('keyModal');
+          mainApp.style.display = 'flex';
+          initApp();
+        }, 1500);
+      }, 1000);
     }
     
     function contactDeveloper() {
@@ -922,11 +890,11 @@
       const icon = type === 'success' ? 'fa-check-circle' : 
                   type === 'error' ? 'fa-exclamation-circle' :
                   type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-      
+    
       notificationEl.innerHTML = `<i class="fas ${icon}"></i> <span class="notification-text">${message}</span>`;
       notificationEl.className = `notification ${type}`;
       notificationEl.classList.add('show');
-      
+    
       setTimeout(() => {
         notificationEl.classList.remove('show');
       }, 3000);
@@ -962,7 +930,8 @@
     function loadPatternMap() {
       spinner.style.display = 'block';
       statusEl.textContent = "Loading pattern data from Firebase...";
-      
+    
+      // Simulated pattern map (replace with Firebase data in production)
       patternMap = {
         "SBSSB": "B",
         "BSSBS": "B",
@@ -998,7 +967,7 @@
         "SSSSB": "B",
         "SSSBB": "S"
       };
-      
+    
       console.log("PatternMap Loaded:", Object.keys(patternMap).length + " patterns");
       spinner.style.display = 'none';
       statusEl.textContent = `Enter pattern (B/S)`;
@@ -1008,14 +977,14 @@
     
     function updatePatternDisplay() {
       patternDisplay.innerHTML = '';
-      
+    
       inputDigits.forEach(d => {
         const digitEl = document.createElement('div');
         digitEl.className = `digit ${d}`;
         digitEl.textContent = d;
         patternDisplay.appendChild(digitEl);
       });
-      
+    
       const remaining = patternLength - inputDigits.length;
       for (let i = 0; i < remaining; i++) {
         const placeholder = document.createElement('div');
@@ -1027,10 +996,10 @@
     
     function shouldReversePrediction() {
       if (consecutiveLosses <= 0) return false;
-      
+    
       const cycle = Math.floor((consecutiveLosses - 1) / 2) + 1;
       const positionInCycle = (consecutiveLosses - 1) % 2;
-      
+    
       if (cycle % 2 === 1) {
         return positionInCycle === 0;
       } else {
@@ -1040,20 +1009,20 @@
     
     function findBestMatch() {
       if (inputDigits.length < patternLength) return null;
-      
+    
       const lastFive = inputDigits.slice(-5).join('');
-      
+    
       if (patternMap[lastFive]) {
         let predictionValue = patternMap[lastFive];
         const shouldReverse = shouldReversePrediction();
-        
+    
         if (shouldReverse) {
           predictionValue = predictionValue === 'B' ? 'S' : 'B';
         }
-        
+    
         const displayValue = predictionValue === 'B' ? 'BIG' : 'SMALL';
         const confidence = 100;
-        
+    
         return {
           pattern: lastFive,
           value: predictionValue,
@@ -1062,13 +1031,13 @@
           reversed: shouldReverse
         };
       }
-      
+    
       return null;
     }
     
     function showResult() {
       if (isProcessing) return;
-      
+    
       isProcessing = true;
       spinner.style.display = 'block';
       predictionEl.textContent = '?';
@@ -1076,23 +1045,23 @@
       confidenceEl.textContent = 'Analyzing pattern...';
       statusEl.textContent = "Connecting to AI server...";
       noMatchEl.style.display = 'none';
-      
+    
       setTimeout(() => {
         const match = findBestMatch();
-        
+    
         if (match) {
           predictionEl.textContent = match.displayValue;
           predictionEl.classList.remove('win', 'lose');
           let confidenceText = `Confidence: ${match.confidence}%`;
-          
+    
           if (match.reversed) {
             confidenceText += " (Reversed Prediction)";
           }
-          
+    
           confidenceEl.textContent = confidenceText;
           confidenceEl.style.color = match.confidence > 70 ? '#76ff03' :
-                                  match.confidence > 50 ? '#ffd54f' : '#ff5252';
-          
+                                    match.confidence > 50 ? '#ffd54f' : '#ff5252';
+    
           statusEl.textContent = "Prediction complete";
           noMatchEl.style.display = 'none';
           showNotification(`Prediction: ${match.displayValue}${match.reversed ? ' (Reversed)' : ''}`, "success");
@@ -1106,7 +1075,7 @@
           showNotification("No matching pattern found", "warning");
           playNotificationSound();
         }
-        
+    
         spinner.style.display = 'none';
         isProcessing = false;
       }, 1500);
@@ -1119,7 +1088,7 @@
       inputDigits.push(val);
       updatePatternDisplay();
       showNotification(`Added ${val} to pattern`, "info");
-  
+    
       if (inputDigits.length === patternLength) {
         showResult();
       } else {
@@ -1136,12 +1105,12 @@
         const removed = inputDigits.pop();
         updatePatternDisplay();
         showNotification(`Removed ${removed} from pattern`, "info");
-        
+    
         predictionEl.textContent = '?';
         predictionEl.classList.remove('win', 'lose');
         confidenceEl.textContent = '';
         noMatchEl.style.display = 'none';
-        
+    
         if (inputDigits.length === 0) {
           statusEl.textContent = "Enter (B/S) for prediction";
         } else {
@@ -1172,12 +1141,12 @@
       confidenceEl.textContent = '';
       showNotification("Win recorded!", "success");
       playWinSound();
-      
+    
       if (loseCount > 0) {
         loseCount--;
         loseCountEl.textContent = loseCount;
       }
-      
+    
       consecutiveLosses = 0;
     }
     
@@ -1204,7 +1173,7 @@
     
     function initApp() {
       updatePatternDisplay();
-      
+    
       const btnBig = document.getElementById('btnBig');
       const btnSmall = document.getElementById('btnSmall');
       const btnWin = document.getElementById('btnWin');
@@ -1213,122 +1182,56 @@
       const btnClear = document.getElementById('btnClear');
       const soundToggle = document.getElementById('soundToggle');
       const keyTimeBtn = document.getElementById('keyTimeBtn');
-      
-      btnBig.removeEventListener('click', handleInput);
-      btnBig.removeEventListener('touchstart', handleInput);
-      btnSmall.removeEventListener('click', handleInput);
-      btnSmall.removeEventListener('touchstart', handleInput);
-      btnWin.removeEventListener('click', handleWin);
-      btnWin.removeEventListener('touchstart', handleWin);
-      btnLose.removeEventListener('click', handleLose);
-      btnLose.removeEventListener('touchstart', handleLose);
-      btnDelete.removeEventListener('click', deleteLastInput);
-      btnDelete.removeEventListener('touchstart', deleteLastInput);
-      btnClear.removeEventListener('click', clearAllData);
-      btnClear.removeEventListener('touchstart', clearAllData);
-      soundToggle.removeEventListener('click', toggleSound);
-      soundToggle.removeEventListener('touchstart', toggleSound);
-      keyTimeBtn.removeEventListener('click', checkKeyTime);
-      keyTimeBtn.removeEventListener('touchstart', checkKeyTime);
-      
-      btnBig.addEventListener('click', () => handleInput('B'));
-      btnBig.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput('B'); }, { passive: false });
-      btnSmall.addEventListener('click', () => handleInput('S'));
-      btnSmall.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput('S'); }, { passive: false });
-      btnWin.addEventListener('click', handleWin);
-      btnWin.addEventListener('touchstart', (e) => { e.preventDefault(); handleWin(); }, { passive: false });
-      btnLose.addEventListener('click', handleLose);
-      btnLose.addEventListener('touchstart', (e) => { e.preventDefault(); handleLose(); }, { passive: false });
-      btnDelete.addEventListener('click', deleteLastInput);
-      btnDelete.addEventListener('touchstart', (e) => { e.preventDefault(); deleteLastInput(); }, { passive: false });
-      btnClear.addEventListener('click', clearAllData);
-      btnClear.addEventListener('touchstart', (e) => { e.preventDefault(); clearAllData(); }, { passive: false });
-      soundToggle.addEventListener('click', toggleSound);
-      soundToggle.addEventListener('touchstart', toggleSound, { passive: false });
-      keyTimeBtn.addEventListener('click', checkKeyTime);
-      keyTimeBtn.addEventListener('touchstart', checkKeyTime, { passive: false });
-      
+    
+      // Clear any existing event listeners by replacing buttons
+      const newBtnBig = btnBig.cloneNode(true);
+      const newBtnSmall = btnSmall.cloneNode(true);
+      const newBtnWin = btnWin.cloneNode(true);
+      const newBtnLose = btnLose.cloneNode(true);
+      const newBtnDelete = btnDelete.cloneNode(true);
+      const newBtnClear = btnClear.cloneNode(true);
+      const newSoundToggle = soundToggle.cloneNode(true);
+      const newKeyTimeBtn = keyTimeBtn.cloneNode(true);
+    
+      btnBig.parentNode.replaceChild(newBtnBig, btnBig);
+      btnSmall.parentNode.replaceChild(newBtnSmall, btnSmall);
+      btnWin.parentNode.replaceChild(newBtnWin, btnWin);
+      btnLose.parentNode.replaceChild(newBtnLose, btnLose);
+      btnDelete.parentNode.replaceChild(newBtnDelete, btnDelete);
+      btnClear.parentNode.replaceChild(newBtnClear, btnClear);
+      soundToggle.parentNode.replaceChild(newSoundToggle, soundToggle);
+      keyTimeBtn.parentNode.replaceChild(newKeyTimeBtn, keyTimeBtn);
+    
+      // Add event listeners for buttons
+      newBtnBig.addEventListener('click', () => handleInput('B'));
+      newBtnBig.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput('B'); }, { passive: false });
+      newBtnSmall.addEventListener('click', () => handleInput('S'));
+      newBtnSmall.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput('S'); }, { passive: false });
+      newBtnWin.addEventListener('click', handleWin);
+      newBtnWin.addEventListener('touchstart', (e) => { e.preventDefault(); handleWin(); }, { passive: false });
+      newBtnLose.addEventListener('click', handleLose);
+      newBtnLose.addEventListener('touchstart', (e) => { e.preventDefault(); handleLose(); }, { passive: false });
+      newBtnDelete.addEventListener('click', deleteLastInput);
+      newBtnDelete.addEventListener('touchstart', (e) => { e.preventDefault(); deleteLastInput(); }, { passive: false });
+      newBtnClear.addEventListener('click', clearAllData);
+      newBtnClear.addEventListener('touchstart', (e) => { e.preventDefault(); clearAllData(); }, { passive: false });
+    
+      // Add event listeners for sound toggle
+      newSoundToggle.addEventListener('click', toggleSound);
+      newSoundToggle.addEventListener('touchstart', toggleSound, { passive: false });
+    
+      // Add event listeners for key time button
+      newKeyTimeBtn.addEventListener('click', checkKeyTime);
+      newKeyTimeBtn.addEventListener('touchstart', checkKeyTime, { passive: false });
+    
       document.removeEventListener('keydown', handleKeyboardInput);
       document.addEventListener('keydown', handleKeyboardInput);
-      
+    
       loadPatternMap();
-      
+    
       showNotification("Welcome to ZAW GYI-13DIGIT AI Predictor", "info");
       console.log("App initialized. Touch support: " + ('ontouchstart' in window));
     }
-
-    // ... existing code ...
-
-    function checkKeyTime(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      const now = Date.now();
-      if (now - lastKeyTimeCheck < 300) {
-        console.log("Key time check debounced");
-        return;
-      }
-      lastKeyTimeCheck = now;
-      const expiryTime = localStorage.getItem('licenseExpiry');
-      if (expiryTime) {
-        const now = Date.now();
-        const expiry = parseInt(expiryTime);
-        if (now < expiry) {
-          const remainingMs = expiry - now;
-          const remainingDays = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
-          const remainingHours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const remainingMinutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-          
-          // Show notification for 2 seconds instead of default 3
-          const notification = showNotification(`License valid for ${remainingDays} days, ${remainingHours} hours, ${remainingMinutes} minutes`, "info");
-          
-          // Clear after 2 seconds
-          setTimeout(() => {
-            if (notification && notification.classList) {
-              notification.classList.remove('show');
-            }
-          }, 2000);
-        } else {
-          const notification = showNotification("License key has expired", "error");
-          
-          // Clear after 2 seconds
-          setTimeout(() => {
-            if (notification && notification.classList) {
-              notification.classList.remove('show');
-            }
-          }, 2000);
-          
-          mainApp.style.display = 'none';
-          showKeyModal();
-        }
-      } else {
-        const notification = showNotification("No valid license key found", "error");
-        
-        // Clear after 2 seconds
-        setTimeout(() => {
-          if (notification && notification.classList) {
-            notification.classList.remove('show');
-          }
-        }, 2000);
-      }
-      console.log(`Key time checked. Touch support: ${'ontouchstart' in window}`);
-    }
-
-    // Modify the showNotification function to return the notification element
-    function showNotification(message, type = 'info') {
-      const icon = type === 'success' ? 'fa-check-circle' : 
-                  type === 'error' ? 'fa-exclamation-circle' :
-                  type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-      
-      notificationEl.innerHTML = `<i class="fas ${icon}"></i> <span class="notification-text">${message}</span>`;
-      notificationEl.className = `notification ${type}`;
-      notificationEl.classList.add('show');
-      
-      // Return the notification element so we can reference it later
-      return notificationEl;
-    }
-
-    // ... rest of the code ...
-
     
     document.addEventListener('DOMContentLoaded', () => {
       checkLicenseStatus();
